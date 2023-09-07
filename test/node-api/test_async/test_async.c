@@ -200,7 +200,7 @@ static napi_value DoRepeatedWork(napi_env env, napi_callback_info info) {
   return NULL;
 }
 
-static napi_value Init(napi_env env, napi_value exports) {
+NAPI_MODULE_INIT(/* napi_env env, napi_value exports */) {
   napi_property_descriptor properties[] = {
     DECLARE_NODE_API_PROPERTY("Test", Test),
     DECLARE_NODE_API_PROPERTY("TestCancel", TestCancel),
@@ -212,5 +212,3 @@ static napi_value Init(napi_env env, napi_value exports) {
 
   return exports;
 }
-
-NAPI_MODULE(NODE_GYP_MODULE_NAME, Init)

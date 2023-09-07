@@ -20,6 +20,15 @@ static void Finalize(napi_env env, void* data, void* hint) {
   free(ref);
 }
 
+static void PureFinalize(node_api_pure_env env, void* data, void* hint) {
+#if defined(NAPI_EXPERIMENTAL) && defined(NODE_API_EXPERIMENTAL_PURE_ENV)
+  NODE_API_PURE_CALL_RETURN_VOID(
+      env, node_api_post_finalizer(env, Finalize, data, hint));
+#else
+  Finalize(env, data, hint);
+#endif  // NAPI_EXPERIMENTAL && NODE_API_EXPERIMENTAL_PURE_ENV
+}
+
 static napi_value CreateRef(napi_env env, napi_callback_info info) {
   size_t argc = 1;
   napi_value cb;
@@ -30,7 +39,7 @@ static napi_value CreateRef(napi_env env, napi_callback_info info) {
   NODE_API_CALL(env, napi_typeof(env, cb, &value_type));
   NODE_API_ASSERT(
       env, value_type == napi_function, "argument must be function");
-  NODE_API_CALL(env, napi_add_finalizer(env, cb, ref, Finalize, NULL, ref));
+  NODE_API_CALL(env, napi_add_finalizer(env, cb, ref, PureFinalize, NULL, ref));
   return cb;
 }
 

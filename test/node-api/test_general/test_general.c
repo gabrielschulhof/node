@@ -37,7 +37,7 @@ static napi_value GetFilename(napi_env env, napi_callback_info info) {
   return result;
 }
 
-static napi_value Init(napi_env env, napi_value exports) {
+NAPI_MODULE_INIT(/*napi_env env, napi_value exports*/) {
   napi_property_descriptor descriptors[] = {
     DECLARE_NODE_API_PROPERTY("testGetNodeVersion", testGetNodeVersion),
     DECLARE_NODE_API_GETTER("filename", GetFilename),
@@ -48,5 +48,3 @@ static napi_value Init(napi_env env, napi_value exports) {
 
   return exports;
 }
-
-NAPI_MODULE(NODE_GYP_MODULE_NAME, Init)

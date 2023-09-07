@@ -22,6 +22,32 @@ typedef uint16_t char16_t;
 // JSVM API types are all opaque pointers for ABI stability
 // typedef undefined structs instead of void* for compile time type safety
 typedef struct napi_env__* napi_env;
+
+// We need to mark APIs which are "pure", meaning that they do not interact
+// with the JS engine, and can therefore be called synchronously from a
+// finalizer that itself runs synchronously during garbage collection. Such
+// "pure" APIs can receive either a `napi_env` or a `node_api_pure_env` as
+// their first parameter, because we should be able to also call them during
+// normal, non-garbage-collecting operations, whereas "non-pure" APIs can only
+// receive a `napi_env` as their first parameter, because we must not call them
+// during garbage collection. In lieu of inheritance, we use the properties of
+// the const qualifier to accomplish this, because both a const and a non-const
+// value can be passed to an API expecting a const value, but only a non-const
+// value can be passed to an API expecting a non-const value.
+//
+// In conjunction with appropriate CFLAGS to warn us if we're passing a const
+// (pure) environment into an API that expects a non-const (non-pure)
+// environment, and the definition of pure finalizer function pointer types
+// below, which receive a pure environment as their first parameter, and can
+// thus only call pure APIs (unless the user explicitly casts the environment),
+// we achieve the ability to ensure at compile time that we do not call non-
+// pure APIs from a synchronous (pure) finalizer.
+#if defined(NAPI_EXPERIMENTAL) && defined(NODE_API_EXPERIMENTAL_PURE_ENV)
+typedef const struct napi_env__* node_api_pure_env;
+#else
+typedef struct napi_env__* node_api_pure_env;
+#endif  // NAPI_EXPERIMENTAL && NODE_API_EXPERIMENTAL_PURE_ENV
+
 typedef struct napi_value__* napi_value;
 typedef struct napi_ref__* napi_ref;
 typedef struct napi_handle_scope__* napi_handle_scope;
@@ -115,6 +141,13 @@ typedef napi_value(NAPI_CDECL* napi_callback)(napi_env env,
 typedef void(NAPI_CDECL* napi_finalize)(napi_env env,
                                         void* finalize_data,
                                         void* finalize_hint);
+#if defined(NAPI_EXPERIMENTAL) && defined(NODE_API_EXPERIMENTAL_PURE_ENV)
+typedef void(NAPI_CDECL* node_api_pure_finalize)(node_api_pure_env env,
+                                                 void* finalize_data,
+                                                 void* finalize_hint);
+#else
+typedef napi_finalize node_api_pure_finalize;
+#endif  // NAPI_EXPERIMENTAL && NODE_API_EXPERIMENTAL_PURE_ENV
 
 typedef struct {
   // One of utf8name or name should be NULL.

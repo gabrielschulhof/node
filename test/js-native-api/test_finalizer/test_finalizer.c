@@ -11,17 +11,17 @@ typedef struct {
   napi_ref js_func;
 } FinalizerData;
 
-static void finalizerOnlyCallback(napi_env env,
+static void finalizerOnlyCallback(node_api_pure_env env,
                                   void* finalize_data,
                                   void* finalize_hint) {
   FinalizerData* data = (FinalizerData*)finalize_data;
   int32_t count = ++data->finalize_count;
 
   // It is safe to access instance data
-  NODE_API_CALL_RETURN_VOID(env, napi_get_instance_data(env, (void**)&data));
-  NODE_API_ASSERT_RETURN_VOID(env,
-                              count = data->finalize_count,
-                              "Expected to be the same FinalizerData");
+  NODE_API_PURE_CALL_RETURN_VOID(env,
+                                 napi_get_instance_data(env, (void**)&data));
+  NODE_API_PURE_ASSERT_RETURN_VOID(count = data->finalize_count,
+                                   "Expected to the same FinalizerData");
 }
 
 static void finalizerCallingJSCallback(napi_env env,
@@ -40,22 +40,24 @@ static void finalizerCallingJSCallback(napi_env env,
 }
 
 // Schedule async finalizer to run JavaScript-touching code.
-static void finalizerWithJSCallback(napi_env env,
+static void finalizerWithJSCallback(node_api_pure_env env,
                                     void* finalize_data,
                                     void* finalize_hint) {
-  NODE_API_CALL_RETURN_VOID(
+  NODE_API_PURE_CALL_RETURN_VOID(
       env,
       node_api_post_finalizer(
           env, finalizerCallingJSCallback, finalize_data, finalize_hint));
 }
 
-static void finalizerWithFailedJSCallback(napi_env env,
+static void finalizerWithFailedJSCallback(node_api_pure_env env,
                                           void* finalize_data,
                                           void* finalize_hint) {
   napi_value obj;
   FinalizerData* data = (FinalizerData*)finalize_data;
   ++data->finalize_count;
-  NODE_API_CALL_RETURN_VOID(env, napi_create_object(env, &obj));
+  // We intentionally cast to napi_env and call an API that cannot be called
+  // during garbage collection. This will cause the process to fail.
+  NODE_API_PURE_CALL_RETURN_VOID(env, napi_create_object((napi_env)env, &obj));
 }
 
 static napi_value addFinalizer(napi_env env, napi_callback_info info) {
@@ -117,7 +119,7 @@ static napi_value getFinalizerCallCount(napi_env env, napi_callback_info info) {
   return result;
 }
 
-static void finalizeData(napi_env env, void* data, void* hint) {
+static void finalizeData(node_api_pure_env env, void* data, void* hint) {
   free(data);
 }
 

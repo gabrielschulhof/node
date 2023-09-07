@@ -104,7 +104,7 @@ static napi_value TestResolveAsync(napi_env env, napi_callback_info info) {
   return promise;
 }
 
-static napi_value Init(napi_env env, napi_value exports) {
+NAPI_MODULE_INIT(/* napi_env env, napi_value exports */) {
   napi_property_descriptor descriptors[] = {
     DECLARE_NODE_API_PROPERTY("runInCallbackScope", RunInCallbackScope),
     DECLARE_NODE_API_PROPERTY("testResolveAsync", TestResolveAsync)
@@ -115,5 +115,3 @@ static napi_value Init(napi_env env, napi_value exports) {
 
   return exports;
 }
-
-NAPI_MODULE(NODE_GYP_MODULE_NAME, Init)

@@ -239,9 +239,9 @@ TEST_F(LinkedBindingTest, LocallyDefinedLinkedBindingNapiRefExperimentalTest) {
 napi_value NapiLinkedWithInstanceData(napi_env env, napi_value exports) {
   int* instance_data = new int(0);
   CHECK_EQ(napi_set_instance_data(
-               env,
+               static_cast<node_api_pure_env>(env),
                instance_data,
-               [](napi_env env, void* data, void* hint) {
+               [](node_api_pure_env env, void* data, void* hint) {
                  ++*static_cast<int*>(data);
                },
                nullptr),

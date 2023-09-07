@@ -5,7 +5,7 @@
       "sources": [
         "test_cannot_run_js.c"
       ],
-      "defines": [ "NAPI_EXPERIMENTAL" ],
+      "defines": [ "NAPI_EXPERIMENTAL", "NODE_API_EXPERIMENTAL_PURE_ENV" ],
     },
     {
       "target_name": "test_pending_exception",

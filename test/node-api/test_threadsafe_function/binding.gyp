@@ -14,7 +14,7 @@
     {
       'target_name': 'test_uncaught_exception',
       'defines': [
-        'NAPI_EXPERIMENTAL'
+        'NAPI_EXPERIMENTAL', 'NODE_API_EXPERIMENTAL_PURE_ENV'
       ],
       'sources': ['test_uncaught_exception.c']
     }

@@ -5,6 +5,9 @@
       "sources": [
         "test_string.c",
         "test_null.c",
+      ],
+      "defines": [
+        "NAPI_EXPERIMENTAL", "NODE_API_EXPERIMENTAL_PURE_ENV"
       ]
     }
   ]
