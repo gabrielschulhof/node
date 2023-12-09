@@ -2,7 +2,7 @@
 #include <node_api.h>
 #include "../../js-native-api/common.h"
 
-static void MyObject_fini(napi_env env, void* data, void* hint) {
+static void MyObject_fini(node_api_nogc_env env, void* data, void* hint) {
   napi_ref* ref = data;
   napi_value global;
   napi_value cleanup;

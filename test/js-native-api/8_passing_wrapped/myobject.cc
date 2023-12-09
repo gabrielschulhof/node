@@ -11,7 +11,7 @@ MyObject::~MyObject() {
 }
 
 void MyObject::Destructor(
-  napi_env env, void* nativeObject, void* /*finalize_hint*/) {
+  node_api_nogc_env env, void* nativeObject, void* /*finalize_hint*/) {
   MyObject* obj = static_cast<MyObject*>(nativeObject);
   delete obj;
 }

@@ -137,7 +137,7 @@ static napi_value testNapiTypeof(napi_env env, napi_callback_info info) {
 }
 
 static bool deref_item_called = false;
-static void deref_item(napi_env env, void* data, void* hint) {
+static void deref_item(node_api_nogc_env env, void* data, void* hint) {
   (void) hint;
 
   NODE_API_ASSERT_RETURN_VOID(env, data == &deref_item_called,
@@ -156,7 +156,7 @@ static napi_value deref_item_was_called(napi_env env, napi_callback_info info) {
 
 static napi_value wrap_first_arg(napi_env env,
                                  napi_callback_info info,
-                                 napi_finalize finalizer,
+                                 node_api_nogc_finalize finalizer,
                                  void* data) {
   size_t argc = 1;
   napi_value to_wrap;
@@ -195,7 +195,7 @@ static napi_value remove_wrap(napi_env env, napi_callback_info info) {
 }
 
 static bool finalize_called = false;
-static void test_finalize(napi_env env, void* data, void* hint) {
+static void test_finalize(node_api_nogc_env env, void* data, void* hint) {
   finalize_called = true;
 }
 

@@ -1,3 +1,4 @@
+#define NAPI_EXPERIMENTAL
 #include <js_native_api.h>
 #include "../common.h"
 #include "../entry_point.h"
@@ -76,9 +77,13 @@ static napi_value wasPending(napi_env env, napi_callback_info info) {
   return result;
 }
 
-static void finalizer(napi_env env, void *data, void *hint) {
+static void js_capable_finalizer(napi_env env, void* data, void* hint) {
   NODE_API_CALL_RETURN_VOID(env,
       napi_throw_error(env, NULL, "Error during Finalize"));
+}
+
+static void finalizer(node_api_nogc_env env, void* data, void* hint) {
+  NODE_API_NOGC_CALL_RETURN_VOID(env, node_api_post_finalizer(env, js_capable_finalizer, data, hint));
 }
 
 static napi_value createExternal(napi_env env, napi_callback_info info) {

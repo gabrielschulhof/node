@@ -82,7 +82,7 @@ static napi_value TestFunctionName(napi_env env, napi_callback_info info) {
   return NULL;
 }
 
-static void finalize_function(napi_env env, void* data, void* hint) {
+static void finalize_function(node_api_nogc_env env, void* data, void* hint) {
   napi_ref ref = data;
 
   // Retrieve the JavaScript undefined value.

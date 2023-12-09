@@ -1,3 +1,4 @@
+#define NAPI_EXPERIMENTAL
 #include <js_native_api.h>
 #include <stdlib.h>
 #include "../common.h"
@@ -5,13 +6,17 @@
 
 static size_t g_call_count = 0;
 
-static void Destructor(napi_env env, void* data, void* nothing) {
+static void JSDestructor(napi_env env, void* data, void* nothing) {
   napi_ref* ref = data;
   NODE_API_CALL_RETURN_VOID(env, napi_delete_reference(env, *ref));
   free(ref);
 }
 
-static void NoDeleteDestructor(napi_env env, void* data, void* hint) {
+static void Destructor(node_api_nogc_env env, void* data, void* nothing) {
+  NODE_API_NOGC_CALL_RETURN_VOID(env, node_api_post_finalizer(env, JSDestructor, data, nothing));
+}
+
+static void NoDeleteDestructor(node_api_nogc_env env, void* data, void* hint) {
   napi_ref* ref = data;
   size_t* call_count = hint;
 
@@ -43,7 +48,7 @@ static napi_value New(napi_env env, napi_callback_info info) {
   return js_this;
 }
 
-static void NoopDeleter(napi_env env, void* data, void* hint) {}
+static void NoopDeleter(node_api_nogc_env env, void* data, void* hint) {}
 
 // Tests that calling napi_remove_wrap and napi_delete_reference consecutively
 // doesn't crash the process.

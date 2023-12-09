@@ -1,8 +1,7 @@
+#include <js_native_api.h>
 #include <limits.h>  // INT_MAX
 #include <stdlib.h>
 #include <string.h>
-#define NAPI_EXPERIMENTAL
-#include <js_native_api.h>
 #include "../common.h"
 #include "../entry_point.h"
 #include "test_null.h"
@@ -88,7 +87,7 @@ static napi_value TestTwoByteImpl(napi_env env,
   return output;
 }
 
-static void free_string(napi_env env, void* data, void* hint) {
+static void free_string(node_api_nogc_env env, void* data, void* hint) {
   free(data);
 }
 

@@ -2,9 +2,9 @@
 #include "../../js-native-api/common.h"
 
 // Testing calling into JavaScript
-static void ThreadSafeFunctionFinalize(napi_env env,
-                                       void* finalize_data,
-                                       void* finalize_hint) {
+static void ThreadSafeFunctionJsCapableFinalize(napi_env env,
+                                                void* finalize_data,
+                                                void* finalize_hint) {
   napi_ref js_func_ref = (napi_ref)finalize_data;
   napi_value js_func;
   napi_value recv;
@@ -14,6 +14,21 @@ static void ThreadSafeFunctionFinalize(napi_env env,
   NODE_API_CALL_RETURN_VOID(
       env, napi_call_function(env, recv, js_func, 0, NULL, NULL));
   NODE_API_CALL_RETURN_VOID(env, napi_delete_reference(env, js_func_ref));
+}
+
+static void ThreadSafeFunctionFinalize(node_api_nogc_env env,
+                                       void* finalize_data,
+                                       void* finalize_hint) {
+#if defined(NAPI_EXPERIMENTAL)
+  NODE_API_NOGC_CALL_RETURN_VOID(
+      env,
+      node_api_post_finalizer(env,
+                              ThreadSafeFunctionJsCapableFinalize,
+                              finalize_data,
+                              finalize_hint));
+#else
+  ThreadSafeFunctionJsCapableFinalize(env, finalize_data, finalize_hint);
+#endif  // NAPI_EXPERIMENTAL
 }
 
 // Testing calling into JavaScript
