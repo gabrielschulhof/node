@@ -1279,6 +1279,14 @@ void Environment::RunCleanup() {
   // Defer the BaseObject cleanup after handles are cleaned up.
   CleanupHandles();
 
+  // We iterate like this because calling user code might result in new
+  // Cleanable items getting added to the queue, so we want to keep iterating
+  // until the queue is empty.
+  while (!cleanable_queue_.IsEmpty()) {
+    Cleanable* cleanable = cleanable_queue_.PopFront();
+    cleanable->Clean();
+  }
+
   while (!cleanup_queue_.empty() || principal_realm_->HasCleanupHooks() ||
          native_immediates_.size() > 0 ||
          native_immediates_threadsafe_.size() > 0 ||
